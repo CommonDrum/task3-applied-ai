@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import pandas as pd
 import numpy as np
@@ -6,6 +7,7 @@ from scipy import sparse
 import os
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Load everything at startup
 df = pd.read_csv('song_dataset.csv', header=None,
@@ -44,6 +46,16 @@ def add_new_user(user_id, song_ids):
     model.fit_partial(new_interaction)
     
     return new_user_idx
+
+"""
+/add_user
+
+It will add a new user to the model with the given user ID and song interactions.
+
+Parameters:
+- user_id: The user ID to add
+- song_ids: A list of song IDs that the user has interacted with
+"""
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -94,6 +106,16 @@ def get_song_recommendations(user_idx, n_recommendations):
     
     return recommendations
 
+"""
+/recommendations
+
+It will return a list of N song recommendations for a given user. 
+
+Parameters:
+- user_id: The user ID for which recommendations are requested
+- n: The number of recommendations to return (default is 10)
+"""
+
 @app.route('/recommendations', methods=['GET'])
 def get_recommendations():
     try:
@@ -109,6 +131,8 @@ def get_recommendations():
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
